@@ -1,0 +1,632 @@
+{
+	"info": {
+		"_postman_id": "nfci-backend-api-collection",
+		"name": "NFCI Backend API",
+		"description": "Complete API collection for the NFCI Backend Laravel application.\n\nBase URL: http://localhost:8000/api/v1\n\n## Authentication\nThis API uses JWT (Bearer Token) authentication. Start by registering or logging in to get a token. The token is automatically saved to the `token` collection variable.\n\n## Workflow\n1. Register or Login → token is auto-saved\n2. Use any protected endpoint (token is applied via Bearer auth)\n3. Refresh token before expiry\n4. Logout when done",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"description": "Authentication endpoints — register, login, logout, refresh, and profile.",
+			"item": [
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const json = pm.response.json();",
+									"    if (json.data && json.data.token) {",
+									"        pm.collectionVariables.set('token', json.data.token.access_token);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Admin User\",\n    \"email\": \"admin@nfci.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "register"]
+						},
+						"description": "Register a new user account.\n\n**Validation:**\n- `name` — required, string, max 255\n- `email` — required, valid email, unique\n- `password` — required, min 8 chars, must match `password_confirmation`\n\n**Note:** Token is auto-saved to collection variables on success."
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const json = pm.response.json();",
+									"    if (json.data && json.data.token) {",
+									"        pm.collectionVariables.set('token', json.data.token.access_token);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@nfci.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Login with email and password to receive a JWT token.\n\n**Validation:**\n- `email` — required, valid email\n- `password` — required\n\n**Note:** Token is auto-saved to collection variables on success."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User (Me)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "me"]
+						},
+						"description": "Get the authenticated user's profile.\n\n**Auth:** Bearer token required."
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const json = pm.response.json();",
+									"    if (json.data && json.data.token) {",
+									"        pm.collectionVariables.set('token', json.data.token.access_token);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/refresh",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "refresh"]
+						},
+						"description": "Refresh the current JWT token. Returns a new token and invalidates the old one.\n\n**Auth:** Bearer token required.\n\n**Note:** New token is auto-saved to collection variables on success."
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    pm.collectionVariables.set('token', '');",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "logout"]
+						},
+						"description": "Logout and invalidate the current JWT token.\n\n**Auth:** Bearer token required.\n\n**Note:** Token variable is cleared on success."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Public",
+			"description": "Public endpoints that do not require authentication.",
+			"item": [
+				{
+					"name": "Render Page (Public)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/render/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["render", "1"]
+						},
+						"description": "Render a page by its page number for frontend consumption.\n\nReturns the page with all **visible** components, their configs, and assets.\nOnly **active** pages are returned.\n\n**No authentication required.**\n\n**URL Params:**\n- `pageNumber` — integer (the page to render)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pages",
+			"description": "CRUD operations for managing pages.",
+			"item": [
+				{
+					"name": "List All Pages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/pages?per_page=15&status=",
+							"host": ["{{baseUrl}}"],
+							"path": ["pages"],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "15",
+									"description": "Items per page (max 100). Default: 15"
+								},
+								{
+									"key": "status",
+									"value": "",
+									"description": "Filter by status: active, draft, archived. Leave empty for all.",
+									"disabled": true
+								}
+							]
+						},
+						"description": "List all pages with pagination.\n\n**Auth:** Bearer token required.\n\n**Query Params:**\n- `per_page` — optional, max 100 (default 15)\n- `status` — optional, filter by: `active`, `draft`, `archived`"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Page by Number",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/pages/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["pages", "1"]
+						},
+						"description": "Get a single page by its page number, including all components and assets.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `pageNumber` — integer"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Page",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"page_number\": 1,\n    \"title\": \"Home Page\",\n    \"slug\": \"home\",\n    \"meta_description\": \"Welcome to the NFCI home page\",\n    \"status\": \"active\",\n    \"components\": [\"CTA 1\", \"IMGGAL 2\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pages",
+							"host": ["{{baseUrl}}"],
+							"path": ["pages"]
+						},
+						"description": "Create a new page, optionally attaching components by compound ID.\n\n**Auth:** Bearer token required.\n\n**Body:**\n- `page_number` — required, integer, unique\n- `title` — required, string, max 255\n- `slug` — optional, string, unique\n- `meta_description` — optional, string, max 1000\n- `status` — optional, one of: `active`, `draft`, `archived`\n- `components` — optional, array of compound IDs (e.g. `[\"CTA 2\", \"IMGGAL 3\"]`)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Page",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Home Page\",\n    \"slug\": \"home-updated\",\n    \"meta_description\": \"Updated description\",\n    \"status\": \"draft\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pages/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["pages", "1"]
+						},
+						"description": "Update page metadata.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `pageNumber` — integer\n\n**Body (all optional):**\n- `title` — string, max 255\n- `slug` — string, unique\n- `meta_description` — string, max 1000\n- `status` — one of: `active`, `draft`, `archived`"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Page",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/pages/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["pages", "1"]
+						},
+						"description": "Soft-delete a page by its page number.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `pageNumber` — integer"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Page Components",
+			"description": "Manage components attached to a page — attach, update, remove, and reorder.",
+			"item": [
+				{
+					"name": "Attach Components to Page",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"components\": [\n        {\n            \"component_id\": \"CTA 2\",\n            \"sort_order\": 1,\n            \"config_overrides\": {\n                \"heading\": \"Get Started Today\",\n                \"button_text\": \"Sign Up\"\n            },\n            \"is_visible\": true\n        },\n        {\n            \"component_id\": \"IMGGAL 3\",\n            \"sort_order\": 2\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pages/1/components",
+							"host": ["{{baseUrl}}"],
+							"path": ["pages", "1", "components"]
+						},
+						"description": "Attach one or more components to a page.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `pageNumber` — integer\n\n**Body:**\n- `components` — required, array (min 1)\n  - `component_id` — required, string (compound ID like `\"CTA 2\"`)\n  - `sort_order` — optional, integer (min 0)\n  - `config_overrides` — optional, object\n  - `is_visible` — optional, boolean"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Page Component",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sort_order\": 3,\n    \"config_overrides\": {\n        \"heading\": \"Updated Heading\",\n        \"button_text\": \"Learn More\"\n    },\n    \"is_visible\": false\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pages/1/components/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["pages", "1", "components", "1"]
+						},
+						"description": "Update a specific page component's config, visibility, or sort order.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `pageNumber` — integer\n- `pageComponentId` — integer (the `page_components.id`)\n\n**Body (all optional):**\n- `sort_order` — integer (min 0)\n- `config_overrides` — object or null\n- `is_visible` — boolean"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Component from Page",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/pages/1/components/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["pages", "1", "components", "1"]
+						},
+						"description": "Remove a component from a page.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `pageNumber` — integer\n- `pageComponentId` — integer (the `page_components.id`)"
+					},
+					"response": []
+				},
+				{
+					"name": "Reorder Components",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order\": [\n        { \"id\": 1, \"sort_order\": 0 },\n        { \"id\": 2, \"sort_order\": 1 },\n        { \"id\": 3, \"sort_order\": 2 }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pages/1/components/reorder",
+							"host": ["{{baseUrl}}"],
+							"path": ["pages", "1", "components", "reorder"]
+						},
+						"description": "Bulk reorder components on a page.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `pageNumber` — integer\n\n**Body:**\n- `order` — required, array (min 1)\n  - `id` — required, integer (existing `page_components.id`)\n  - `sort_order` — required, integer (min 0)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Component Types",
+			"description": "Manage component types and their variants.",
+			"item": [
+				{
+					"name": "List Component Types",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/component-types",
+							"host": ["{{baseUrl}}"],
+							"path": ["component-types"]
+						},
+						"description": "List all component types with their variants.\n\n**Auth:** Bearer token required."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Component Type",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"HERO\",\n    \"name\": \"Hero Section\",\n    \"description\": \"Full-width hero banner with call to action\",\n    \"schema\": {\n        \"heading\": \"string\",\n        \"subheading\": \"string\",\n        \"button_text\": \"string\",\n        \"button_link\": \"string\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/component-types",
+							"host": ["{{baseUrl}}"],
+							"path": ["component-types"]
+						},
+						"description": "Register a new component type.\n\n**Auth:** Bearer token required.\n\n**Body:**\n- `code` — required, string, max 50, unique (auto-uppercased)\n- `name` — required, string, max 255\n- `description` — optional, string\n- `schema` — optional, object (defines the config schema)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Variant for Component Type",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"variant_number\": 1,\n    \"name\": \"Hero Variant 1 - Centered\",\n    \"description\": \"Centered hero with large heading\",\n    \"default_config\": {\n        \"heading\": \"Welcome\",\n        \"subheading\": \"Discover our offerings\",\n        \"button_text\": \"Get Started\",\n        \"button_link\": \"/register\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/component-types/HERO/variants",
+							"host": ["{{baseUrl}}"],
+							"path": ["component-types", "HERO", "variants"]
+						},
+						"description": "Register a new variant for an existing component type.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `code` — string (the component type code, e.g. `HERO`)\n\n**Body:**\n- `variant_number` — required, integer, min 1\n- `name` — required, string, max 255\n- `description` — optional, string\n- `default_config` — optional, object"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Assets",
+			"description": "Upload and manage assets (images, videos, documents) for page components.",
+			"item": [
+				{
+					"name": "Upload Assets",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "page_component_id",
+									"value": "1",
+									"description": "ID of the page_component to attach assets to",
+									"type": "text"
+								},
+								{
+									"key": "files[]",
+									"type": "file",
+									"description": "Files to upload (max 20 files, each max 10MB). Allowed: jpg, jpeg, png, gif, webp, svg, mp4, webm, pdf, doc, docx",
+									"src": []
+								},
+								{
+									"key": "alt_texts[]",
+									"value": "Hero background image",
+									"description": "Alt text for each uploaded file (optional)",
+									"type": "text"
+								},
+								{
+									"key": "asset_type",
+									"value": "image",
+									"description": "Type of asset: image, video, document, icon (default: image)",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/assets/upload",
+							"host": ["{{baseUrl}}"],
+							"path": ["assets", "upload"]
+						},
+						"description": "Upload one or more assets to a page component.\n\n**Auth:** Bearer token required.\n\n**Body (multipart/form-data):**\n- `page_component_id` — required, integer (existing page_components.id)\n- `files[]` — required, array of files (1-20 files, each max 10MB)\n- `alt_texts[]` — optional, alt text per file\n- `asset_type` — optional: `image`, `video`, `document`, `icon` (default: `image`)\n\n**Allowed file types:** jpg, jpeg, png, gif, webp, svg, mp4, webm, pdf, doc, docx"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Asset",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/assets/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["assets", "1"]
+						},
+						"description": "Delete an asset by its ID.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `assetId` — integer"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
