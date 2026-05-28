@@ -34,6 +34,49 @@ Route::prefix('v1')->group(function () {
         ->where('pageNumber', '[0-9]+');
 
     // ==========================================================
+    // Debug / Diagnostics (no auth — REMOVE in production once stable)
+    // ==========================================================
+
+    Route::get('/debug/health', function () {
+        $checks = [
+            'timestamp'        => now()->toIso8601String(),
+            'php_version'      => PHP_VERSION,
+            'laravel_version'  => app()->version(),
+            'app_env'          => config('app.env'),
+            'app_debug'        => config('app.debug'),
+            'app_key_set'      => !empty(config('app.key')),
+            'db_connected'     => false,
+            'storage_writable' => is_writable(storage_path('logs')),
+            'cache_driver'     => config('cache.default'),
+            'session_driver'   => config('session.driver'),
+            'log_channel'      => config('logging.default'),
+            'log_stack'        => env('LOG_STACK'),
+        ];
+
+        try {
+            \Illuminate\Support\Facades\DB::connection()->getPdo();
+            $checks['db_connected'] = true;
+            $checks['db_name']      = \Illuminate\Support\Facades\DB::connection()->getDatabaseName();
+        } catch (\Throwable $e) {
+            $checks['db_error'] = $e->getMessage();
+        }
+
+        // Check if key directories exist
+        $checks['paths'] = [
+            'base_path'    => base_path(),
+            'storage_path' => storage_path(),
+            'vendor_exists' => is_dir(base_path('vendor')),
+            'env_exists'    => file_exists(base_path('.env')),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Health check passed',
+            'data'    => $checks,
+        ]);
+    });
+
+    // ==========================================================
     // Protected (JWT auth required)
     // ==========================================================
 

@@ -123,4 +123,58 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
+        // ---- Catch-all: log everything and return structured JSON ----
+        $exceptions->render(function (\Throwable $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                $errorId = strtoupper(substr(md5(uniqid('', true)), 0, 8));
+
+                $context = [
+                    'error_id'  => $errorId,
+                    'exception' => get_class($e),
+                    'message'   => $e->getMessage(),
+                    'code'      => $e->getCode(),
+                    'file'      => $e->getFile(),
+                    'line'      => $e->getLine(),
+                    'trace'     => $e->getTraceAsString(),
+                    'url'       => $request->fullUrl(),
+                    'method'    => $request->method(),
+                    'ip'        => $request->ip(),
+                    'input'     => $request->except(['password', 'password_confirmation', 'token']),
+                    'headers'   => $request->headers->all(),
+                ];
+
+                // Log to default channel
+                \Illuminate\Support\Facades\Log::error("API Error [{$errorId}]: {$e->getMessage()}", $context);
+
+                // Also log to dedicated api_errors channel
+                try {
+                    \Illuminate\Support\Facades\Log::channel('api_errors')
+                        ->error("API Error [{$errorId}]: {$e->getMessage()}", $context);
+                } catch (\Throwable $logEx) {
+                    // Silently ignore if channel is unavailable
+                }
+
+                $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
+
+                $response = [
+                    'success'  => false,
+                    'message'  => 'An unexpected error occurred. Please try again later.',
+                    'data'     => null,
+                    'error_id' => $errorId,
+                ];
+
+                if (config('app.debug')) {
+                    $response['debug'] = [
+                        'exception' => get_class($e),
+                        'message'   => $e->getMessage(),
+                        'file'      => $e->getFile(),
+                        'line'      => $e->getLine(),
+                        'trace'     => collect($e->getTrace())->take(10)->toArray(),
+                    ];
+                }
+
+                return response()->json($response, $status);
+            }
+        });
+
     })->create();

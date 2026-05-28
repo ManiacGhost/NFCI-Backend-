@@ -1,0 +1,7 @@
+# Use when the full Laravel project is uploaded inside public_html (not recommended).
+# Prefer pointing the site document root to the /public folder instead.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^$ public/ [L]
+    RewriteRule ^((?!public/).*)$ public/$1 [L]
+</IfModule>
