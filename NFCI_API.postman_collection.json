@@ -478,7 +478,7 @@
 		},
 		{
 			"name": "Component Types",
-			"description": "Manage component types and their variants.",
+			"description": "Manage component types and their variants — full CRUD.",
 			"item": [
 				{
 					"name": "List Component Types",
@@ -496,6 +496,25 @@
 							"path": ["component-types"]
 						},
 						"description": "List all component types with their variants.\n\n**Auth:** Bearer token required."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Component Type by Code",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/component-types/HERO",
+							"host": ["{{baseUrl}}"],
+							"path": ["component-types", "HERO"]
+						},
+						"description": "Get a single component type by its code, including all variants.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `code` — string (e.g. `HERO`, `CTA`, `IMGGAL`)"
 					},
 					"response": []
 				},
@@ -527,6 +546,52 @@
 					"response": []
 				},
 				{
+					"name": "Update Component Type",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Hero Banner\",\n    \"description\": \"Updated full-width hero banner with CTA\",\n    \"schema\": {\n        \"heading\": \"string\",\n        \"subheading\": \"string\",\n        \"button_text\": \"string\",\n        \"button_link\": \"string\",\n        \"background_image\": \"string\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/component-types/HERO",
+							"host": ["{{baseUrl}}"],
+							"path": ["component-types", "HERO"]
+						},
+						"description": "Update an existing component type.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `code` — string (the component type code, e.g. `HERO`)\n\n**Body (all optional):**\n- `code` — string, max 50, unique (auto-uppercased)\n- `name` — string, max 255\n- `description` — string or null\n- `schema` — object or null"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Component Type",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/component-types/HERO",
+							"host": ["{{baseUrl}}"],
+							"path": ["component-types", "HERO"]
+						},
+						"description": "Delete a component type and all its variants.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `code` — string (the component type code, e.g. `HERO`)\n\n**Note:** Will return `409 Conflict` if any variants are currently attached to pages. Remove them from pages first."
+					},
+					"response": []
+				},
+				{
 					"name": "Create Variant for Component Type",
 					"request": {
 						"method": "POST",
@@ -550,6 +615,52 @@
 							"path": ["component-types", "HERO", "variants"]
 						},
 						"description": "Register a new variant for an existing component type.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `code` — string (the component type code, e.g. `HERO`)\n\n**Body:**\n- `variant_number` — required, integer, min 1\n- `name` — required, string, max 255\n- `description` — optional, string\n- `default_config` — optional, object"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Variant",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Hero Variant 1 - Centered (Updated)\",\n    \"description\": \"Updated centered hero with large heading and gradient\",\n    \"default_config\": {\n        \"heading\": \"Welcome to NFCI\",\n        \"subheading\": \"Building the future\",\n        \"button_text\": \"Learn More\",\n        \"button_link\": \"/about\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/component-types/HERO/variants/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["component-types", "HERO", "variants", "1"]
+						},
+						"description": "Update an existing variant of a component type.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `code` — string (the component type code, e.g. `HERO`)\n- `variantNumber` — integer (the variant number to update)\n\n**Body (all optional):**\n- `variant_number` — integer, min 1 (change the variant number)\n- `name` — string, max 255\n- `description` — string or null\n- `default_config` — object or null\n\n**Note:** If changing `variant_number`, will return `409 Conflict` if the new number already exists."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Variant",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/component-types/HERO/variants/1",
+							"host": ["{{baseUrl}}"],
+							"path": ["component-types", "HERO", "variants", "1"]
+						},
+						"description": "Delete a specific variant from a component type.\n\n**Auth:** Bearer token required.\n\n**URL Params:**\n- `code` — string (the component type code, e.g. `HERO`)\n- `variantNumber` — integer (the variant number to delete)\n\n**Note:** Will return `409 Conflict` if the variant is currently attached to any pages. Remove it from pages first."
 					},
 					"response": []
 				}

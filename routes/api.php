@@ -111,9 +111,14 @@ Route::prefix('v1')->group(function () {
 
         // --- Component Types & Variants ---
         Route::prefix('component-types')->group(function () {
-            Route::get('/',                   [ComponentTypeController::class, 'index']);
-            Route::post('/',                  [ComponentTypeController::class, 'store']);
-            Route::post('/{code}/variants',   [ComponentTypeController::class, 'storeVariant']);
+            Route::get('/',                                [ComponentTypeController::class, 'index']);
+            Route::get('/{code}',                          [ComponentTypeController::class, 'show']);
+            Route::post('/',                               [ComponentTypeController::class, 'store']);
+            Route::put('/{code}',                          [ComponentTypeController::class, 'update']);
+            Route::delete('/{code}',                       [ComponentTypeController::class, 'destroy']);
+            Route::post('/{code}/variants',                [ComponentTypeController::class, 'storeVariant']);
+            Route::put('/{code}/variants/{variantNumber}', [ComponentTypeController::class, 'updateVariant']);
+            Route::delete('/{code}/variants/{variantNumber}', [ComponentTypeController::class, 'destroyVariant']);
         });
 
         // --- Assets ---

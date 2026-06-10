@@ -45,9 +45,17 @@ class ComponentAsset extends Model
 
     /**
      * Get the full public URL for this asset.
+     *
+     * Uses asset() helper with /storage/ prefix for reliable URL generation
+     * on shared hosting where the storage symlink may not resolve correctly
+     * via Storage::url().
      */
     public function getUrlAttribute(): string
     {
-        return Storage::disk('public')->url($this->file_path);
+        // Normalise path separators to forward slashes
+        $path = str_replace('\\', '/', $this->file_path);
+
+        // Build the URL using the APP_URL base + /storage/ prefix
+        return rtrim(config('app.url'), '/') . '/storage/' . ltrim($path, '/');
     }
 }
